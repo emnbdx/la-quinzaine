@@ -1,6 +1,12 @@
 <?php
-	$MAIL_ADRESSE = 'eddy.montus@gmail.com';
-	$MAIL_SUJET = 'Contact from la quinzaine';
+    require_once("config.php");
+    require_once("PHPMailer/src/PHPMailer.php");
+    require_once("PHPMailer/src/SMTP.php");
+	require_once("PHPMailer/src/Exception.php");
+
+    use PHPMailer\PHPMailer\PHPMailer;
+    use PHPMailer\PHPMailer\SMTP;
+    use PHPMailer\PHPMailer\Exception;
 
 	$name = htmlspecialchars($_POST['name']);
 	$mail = htmlspecialchars($_POST['email']);
@@ -9,7 +15,7 @@
 		
 	//Build mail
 	$body = "<html>";
-	$body .= "<head><title> $MAIL_SUJET </title></head>";
+	$body .= "<head><title> Contact from la quinzaine </title></head>";
 
 	$body .= "<body>Bonjour, <br>$name a fait une demande<br><br>";
 	if(strlen($phone) != 0) {
@@ -19,20 +25,39 @@
 		$body .= "Message : $text <br>";			
 	}
 	$body .= "</body>";
-
 	$body .= "</html>";
-	// Pour envoyer un mail HTML, l'en-tête Content-type doit être défini
-	$headers  = 'MIME-Version: 1.0' . "\r\n";
-	$headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
 
-	// En-têtes additionnels
-	$headers .= 'To: Eddy<eddy.montus@gmail.com>, Marine<marinedesplaces@hotmail.fr>' . "\r\n";
-	$headers .= 'From: "'. $name . '"<' . $mail . '>' . "\r\n";
-	$headers .= 'X-Mailer: PHP/' . phpversion() . "\r\n";
+	// Instantiation and passing `true` enables exceptions
+    $mail = new PHPMailer(true);
 
-	if(mail($MAIL_ADRESSE, $MAIL_SUJET, $body, $headers)) {
+    try {
+        //Server settings
+        $mail->SMTPDebug = SMTP::DEBUG_OFF;
+        $mail->isSMTP();
+        $mail->Host       = Config::$MAIL_HOST;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = Config::$MAIL_LOGIN;
+        $mail->Password   = Config::$MAIL_PASSWORD;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = 465;
+
+        // To load the French version
+        $mail->setLanguage('fr', '/PHPMailer/language/');
+        $mail->CharSet    = PHPMailer::CHARSET_UTF8;
+
+        //Recipients
+        $mail->setFrom($mail, $name);
+        $mail->addAddress("eddy.montus@gmail.com", "Eddy");
+        $mail->addAddress("marinedesplaces@hotmail.fr", "Marine");
+        
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = "Contact from la quinzaine";
+        $mail->Body    = $body;
+        
+        $mail->send();
 		echo 'SUCCESS';
-	} else {
+    } catch (Exception $e) {
 		echo 'ERROR';
-	}
+    }
 ?>
