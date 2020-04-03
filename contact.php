@@ -1,12 +1,10 @@
 <?php
-    require_once("config.php");
-    require_once("PHPMailer/src/PHPMailer.php");
-    require_once("PHPMailer/src/SMTP.php");
-	require_once("PHPMailer/src/Exception.php");
-
     use PHPMailer\PHPMailer\PHPMailer;
     use PHPMailer\PHPMailer\SMTP;
     use PHPMailer\PHPMailer\Exception;
+
+    require 'vendor/autoload.php';
+    require_once("config.php");
 
 	$name = htmlspecialchars($_POST['name']);
 	$mail = htmlspecialchars($_POST['email']);
